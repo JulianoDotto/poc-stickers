@@ -1,4 +1,5 @@
 import "./App.css";
+import Konva from "konva";
 import useImage from "use-image";
 import { Image, Stage, Layer, Transformer } from "react-konva";
 import { useRef, useState, useEffect } from "react";
@@ -14,6 +15,29 @@ const STICKERS = [
   },
 ];
 
+const FILTERS = [
+  "",
+  "Blur",
+  "Brighten",
+  "Contrast",
+  "Emboss",
+  "Enhance",
+  "Grayscale",
+  "HSL",
+  "HSV",
+  "Invert",
+  "Kaleidoscope",
+  "Mask",
+  "Noise",
+  "Pixelate",
+  "Posterize",
+  "RGB",
+  "RGBA",
+  "Sepia",
+  "Solarize",
+  "Threshold",
+];
+
 const URLSticker = ({ image, isSelected, onClick, onChange }) => {
   const stickerRef = useRef();
   const trRef = useRef();
@@ -21,7 +45,6 @@ const URLSticker = ({ image, isSelected, onClick, onChange }) => {
 
   useEffect(() => {
     if (isSelected) {
-      // we need to attach transformer manually
       trRef.current.nodes([stickerRef.current]);
       trRef.current.getLayer().batchDraw();
     }
@@ -45,20 +68,6 @@ const URLSticker = ({ image, isSelected, onClick, onChange }) => {
             y: e.target.y(),
           });
         }}
-        // onTransformEnd={(e) => {
-        //   const node = stickerRef.current;
-        //   const scaleX = node.scaleX();
-        //   const scaleY = node.scaleY();
-        //   node.scaleX(1);
-        //   node.scaleY(1);
-        //   onChange({
-        //     ...stickerRef,
-        //     x: node.x(),
-        //     y: node.y(),
-        //     width: Math.max(5, node.width() * scaleX),
-        //     height: Math.max(node.height() * scaleY),
-        //   });
-        // }}
       />
       {isSelected && (
         <Transformer
@@ -75,9 +84,25 @@ const URLSticker = ({ image, isSelected, onClick, onChange }) => {
   );
 };
 
-const URLMainImage = ({ image }) => {
-  const [img] = useImage(image.src);
-  return <Image image={img} x={image.x} y={image.y} />;
+const URLMainImage = ({ image, filter }) => {
+  const [img] = useImage(image.src, "anonymous");
+  const imageRef = useRef();
+
+  useEffect(() => {
+    if (image) {
+      imageRef.current.cache();
+    }
+  }, [image]);
+
+  return (
+    <Image
+      ref={imageRef}
+      image={img}
+      x={image.x}
+      y={image.y}
+      filters={!!FILTERS[filter] ? [Konva.Filters[FILTERS[filter]]] : undefined}
+    />
+  );
 };
 
 function App() {
@@ -86,20 +111,17 @@ function App() {
   const [mainImage, setMainImage] = useState([]);
   const [images, setImages] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
+  const [selectedFilter, setSelectedFilter] = useState(0);
 
   const onImageChange = (e) => {
     setMainImage(e.target.files);
-  };
-
-  const generateImageURL = (image) => {
-    return URL.createObjectURL(image[0]);
   };
 
   const renderMainImage = () => {
     return {
       x: 0,
       y: 0,
-      src: generateImageURL(mainImage),
+      src: URL.createObjectURL(mainImage[0]),
     };
   };
 
@@ -120,12 +142,8 @@ function App() {
   }
 
   const handleExport = () => {
+    setSelectedId(null);
     const uri = stageRef.current.toDataURL();
-    console.log(uri);
-    // we also can save uri as file
-    // but in the demo on Konva website it will not work
-    // because of iframe restrictions
-    // but feel free to use it in your apps:
     downloadURI(uri, "minha_foto.png");
   };
 
@@ -139,49 +157,65 @@ function App() {
   return (
     <>
       <input type="file" accept="image/*" onChange={onImageChange} />
-
-      <div
-        onDrop={(e) => {
-          e.preventDefault();
-          stageRef.current.setPointersPositions(e);
-          setImages(
-            images.concat([
-              {
-                ...stageRef.current.getPointerPosition(),
-                src: dragUrl.current,
-              },
-            ])
-          );
-        }}
-        onDragOver={(e) => e.preventDefault()}
-      >
-        <Stage
-          width={300}
-          height={500}
-          onMouseDown={checkDeselect}
-          onTouchStart={checkDeselect}
-          style={{ border: "1px solid grey", width: "fit-content" }}
-          ref={stageRef}
+      <div className="flex">
+        {selectedFilter !== 0 && (
+          <button onClick={() => setSelectedFilter((prev) => prev - 1)}>
+            {"<"}
+          </button>
+        )}
+        <div
+          onDrop={(e) => {
+            e.preventDefault();
+            stageRef.current.setPointersPositions(e);
+            setImages(
+              images.concat([
+                {
+                  ...stageRef.current.getPointerPosition(),
+                  src: dragUrl.current,
+                },
+              ])
+            );
+          }}
+          onDragOver={(e) => e.preventDefault()}
         >
-          <Layer>
-            {!!mainImage.length && <URLMainImage image={renderMainImage()} />}
-            {images.map((image, index) => {
-              return (
-                <URLSticker
-                  key={index}
-                  isSelected={index === selectedId}
-                  onClick={() => setSelectedId(index)}
-                  onChange={(newAttrs) => {
-                    const rects = images.slice();
-                    rects[index] = newAttrs;
-                    setImages(rects);
-                  }}
-                  image={image}
+          <Stage
+            width={300}
+            height={500}
+            onMouseDown={checkDeselect}
+            onTouchStart={checkDeselect}
+            style={{ border: "1px solid grey", width: "fit-content" }}
+            ref={stageRef}
+          >
+            <Layer>
+              {!!mainImage.length && (
+                <URLMainImage
+                  filter={selectedFilter}
+                  image={renderMainImage()}
                 />
-              );
-            })}
-          </Layer>
-        </Stage>
+              )}
+              {images.map((image, index) => {
+                return (
+                  <URLSticker
+                    key={index}
+                    isSelected={index === selectedId}
+                    onClick={() => setSelectedId(index)}
+                    onChange={(newAttrs) => {
+                      const rects = images.slice();
+                      rects[index] = newAttrs;
+                      setImages(rects);
+                    }}
+                    image={image}
+                  />
+                );
+              })}
+            </Layer>
+          </Stage>
+        </div>
+        {selectedFilter < FILTERS.length - 1 && (
+          <button onClick={() => setSelectedFilter((prev) => prev + 1)}>
+            {">"}
+          </button>
+        )}
       </div>
       {STICKERS.map((sticker) => (
         <img
