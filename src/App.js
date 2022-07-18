@@ -1,6 +1,6 @@
 import "./App.css";
 import { Stage, Layer } from "react-konva";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import URLSticker from "./components/URLSticker";
 import URLMainImage from "./components/URLSticker";
 import { FILTERS, STICKERS } from "./utils";
@@ -16,6 +16,7 @@ function App() {
   const [mainImage, setMainImage] = useState([]);
   const [images, setImages] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
+  const [exportImage, setExportImage] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState(0);
 
   const onImageChange = (e) => {
@@ -41,9 +42,16 @@ function App() {
 
   const handleExport = () => {
     setSelectedId(null);
-    const uri = stageRef.current.toDataURL();
-    downloadURI(uri, "minha_foto.png");
+    setExportImage(true);
   };
+
+  useEffect(() => {
+    if (exportImage && selectedId === null) {
+      const uri = stageRef.current.toDataURL();
+      downloadURI(uri, "minha_foto.png");
+      setExportImage(false);
+    }
+  }, [selectedId, exportImage]);
 
   const removeSelectedSticker = () => {
     const newImages = images;

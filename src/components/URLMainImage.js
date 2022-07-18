@@ -25,6 +25,7 @@ const URLMainImage = ({ image, isSelected, filter, onClick, onChange }) => {
         filters={
           !!FILTERS[filter] ? [Konva.Filters[FILTERS[filter]]] : undefined
         }
+        onClick={onClick}
         draggable
         onDragEnd={(e) => {
           onChange({
