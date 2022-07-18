@@ -5,6 +5,11 @@ import URLSticker from "./components/URLSticker";
 import URLMainImage from "./components/URLSticker";
 import { FILTERS, STICKERS } from "./utils";
 
+const LAYER_SIZE = {
+  x: 300,
+  y: 500,
+};
+
 function App() {
   const stageRef = useRef();
   const dragUrl = useRef();
@@ -47,6 +52,12 @@ function App() {
     setSelectedId(null);
   };
 
+  const checkDragLimitis = (img) => {
+    if (img.x > LAYER_SIZE.x) img.x = LAYER_SIZE.x;
+    if (img.y > LAYER_SIZE.y) img.y = LAYER_SIZE.y;
+    return img;
+  };
+
   return (
     <>
       <input type="file" accept="image/*" onChange={onImageChange} />
@@ -72,8 +83,8 @@ function App() {
           onDragOver={(e) => e.preventDefault()}
         >
           <Stage
-            width={300}
-            height={500}
+            width={LAYER_SIZE.x}
+            height={LAYER_SIZE.y}
             onMouseDown={checkDeselect}
             onTouchStart={checkDeselect}
             style={{ border: "1px solid grey", width: "fit-content" }}
@@ -99,7 +110,7 @@ function App() {
                     onClick={() => setSelectedId(index)}
                     onChange={(newAttrs) => {
                       const rects = images.slice();
-                      rects[index] = newAttrs;
+                      rects[index] = checkDragLimitis(newAttrs);
                       setImages(rects);
                     }}
                     image={image}
