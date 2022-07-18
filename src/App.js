@@ -1,109 +1,9 @@
 import "./App.css";
-import Konva from "konva";
-import useImage from "use-image";
-import { Image, Stage, Layer, Transformer } from "react-konva";
-import { useRef, useState, useEffect } from "react";
-
-const STICKERS = [
-  {
-    src: "https://cdn-icons-png.flaticon.com/128/863/863491.png",
-    alt: "mustache",
-  },
-  {
-    src: "https://konvajs.org/assets/lion.png",
-    alt: "lion",
-  },
-];
-
-const FILTERS = [
-  "",
-  "Blur",
-  "Brighten",
-  "Contrast",
-  "Emboss",
-  "Enhance",
-  "Grayscale",
-  "HSL",
-  "HSV",
-  "Invert",
-  "Kaleidoscope",
-  "Mask",
-  "Noise",
-  "Pixelate",
-  "Posterize",
-  "RGB",
-  "RGBA",
-  "Sepia",
-  "Solarize",
-  "Threshold",
-];
-
-const URLSticker = ({ image, isSelected, onClick, onChange }) => {
-  const stickerRef = useRef();
-  const trRef = useRef();
-  const [img] = useImage(image.src);
-
-  useEffect(() => {
-    if (isSelected) {
-      trRef.current.nodes([stickerRef.current]);
-      trRef.current.getLayer().batchDraw();
-    }
-  }, [isSelected]);
-
-  return (
-    <>
-      <Image
-        ref={stickerRef}
-        onClick={onClick}
-        image={img}
-        x={image.x}
-        y={image.y}
-        offsetX={img ? img.width / 2 : 0}
-        offsetY={img ? img.height / 2 : 0}
-        draggable
-        onDragEnd={(e) => {
-          onChange({
-            ...image,
-            x: e.target.x(),
-            y: e.target.y(),
-          });
-        }}
-      />
-      {isSelected && (
-        <Transformer
-          ref={trRef}
-          boundBoxFunc={(oldBox, newBox) => {
-            if (newBox.width < 5 || newBox.height < 5) {
-              return oldBox;
-            }
-            return newBox;
-          }}
-        />
-      )}
-    </>
-  );
-};
-
-const URLMainImage = ({ image, filter }) => {
-  const [img] = useImage(image.src, "anonymous");
-  const imageRef = useRef();
-
-  useEffect(() => {
-    if (image) {
-      imageRef.current.cache();
-    }
-  }, [image]);
-
-  return (
-    <Image
-      ref={imageRef}
-      image={img}
-      x={image.x}
-      y={image.y}
-      filters={!!FILTERS[filter] ? [Konva.Filters[FILTERS[filter]]] : undefined}
-    />
-  );
-};
+import { Stage, Layer } from "react-konva";
+import { useRef, useState } from "react";
+import URLSticker from "./components/URLSticker";
+import URLMainImage from "./components/URLSticker";
+import { FILTERS, STICKERS } from "./utils";
 
 function App() {
   const stageRef = useRef();
@@ -114,15 +14,8 @@ function App() {
   const [selectedFilter, setSelectedFilter] = useState(0);
 
   const onImageChange = (e) => {
-    setMainImage(e.target.files);
-  };
-
-  const renderMainImage = () => {
-    return {
-      x: 0,
-      y: 0,
-      src: URL.createObjectURL(mainImage[0]),
-    };
+    if (e.target.files.length > 0)
+      setMainImage({ x: 0, y: 0, src: URL.createObjectURL(e.target.files[0]) });
   };
 
   const checkDeselect = (e) => {
@@ -187,10 +80,15 @@ function App() {
             ref={stageRef}
           >
             <Layer>
-              {!!mainImage.length && (
+              {!!mainImage && (
                 <URLMainImage
                   filter={selectedFilter}
-                  image={renderMainImage()}
+                  image={mainImage}
+                  onClick={() => setSelectedId(-1)}
+                  isSelected={-1 === selectedId}
+                  onChange={(newAttrs) => {
+                    setMainImage(newAttrs);
+                  }}
                 />
               )}
               {images.map((image, index) => {
