@@ -7,7 +7,7 @@ import Konva from "konva";
 const URLMainImage = ({ image, isSelected, filter, onClick, onChange }) => {
   const trRef = useRef();
   const imageRef = useRef();
-  const [img] = useImage(image.src);
+  const [img] = useImage(image.src, "anonymous");
 
   useEffect(() => {
     if (isSelected) {
@@ -20,10 +20,6 @@ const URLMainImage = ({ image, isSelected, filter, onClick, onChange }) => {
     if (img) {
       imageRef.current.cache();
     }
-  }, [img]);
-
-  useEffect(() => {
-    console.log(img);
   }, [img]);
 
   return (

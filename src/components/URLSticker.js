@@ -7,7 +7,7 @@ import Konva from "konva";
 const URLSticker = ({ image, isSelected, filter, onClick, onChange }) => {
   const stickerRef = useRef();
   const trRef = useRef();
-  const [img] = useImage(image.src);
+  const [img] = useImage(image.src, "anonymous");
 
   useEffect(() => {
     if (isSelected) {
