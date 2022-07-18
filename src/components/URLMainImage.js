@@ -1,50 +1,68 @@
-import Konva from "konva";
 import useImage from "use-image";
 import { Image, Transformer } from "react-konva";
-import { useRef, useLayoutEffect } from "react";
-import { FILTERS } from "./utils";
+import { useRef, useEffect } from "react";
+import { FILTERS } from "../utils";
+import Konva from "konva";
 
 const URLMainImage = ({ image, isSelected, filter, onClick, onChange }) => {
   const trRef = useRef();
   const imageRef = useRef();
-  const [img] = useImage(image.src, "anonymous");
+  const [img] = useImage(image.src);
 
-  useLayoutEffect(() => {
-    if (image) {
+  useEffect(() => {
+    if (isSelected) {
+      trRef.current.nodes([imageRef.current]);
+      trRef.current.getLayer().batchDraw();
+    }
+  }, [isSelected]);
+
+  useEffect(() => {
+    if (img) {
       imageRef.current.cache();
     }
-  }, [image]);
+  }, [img]);
+
+  useEffect(() => {
+    console.log(img);
+  }, [img]);
 
   return (
     <>
-      <Image
-        ref={imageRef}
-        image={img}
-        x={image.x}
-        y={image.y}
-        filters={
-          !!FILTERS[filter] ? [Konva.Filters[FILTERS[filter]]] : undefined
-        }
-        onClick={onClick}
-        draggable
-        onDragEnd={(e) => {
-          onChange({
-            ...image,
-            x: e.target.x(),
-            y: e.target.y(),
-          });
-        }}
-      />
-      {isSelected && (
-        <Transformer
-          ref={trRef}
-          boundBoxFunc={(oldBox, newBox) => {
-            if (newBox.width < 5 || newBox.height < 5) {
-              return oldBox;
-            }
-            return newBox;
-          }}
-        />
+      {img ? (
+        <>
+          <Image
+            className="sepia"
+            ref={imageRef}
+            onClick={onClick}
+            image={img}
+            width={img ? img.width : 0}
+            height={img ? img.height : 0}
+            x={image?.x}
+            y={image?.y}
+            filters={!!filter ? [Konva.Filters[FILTERS[filter]]] : []}
+            draggable
+            onDragEnd={(e) => {
+              onChange({
+                ...image,
+                x: e.target.x(),
+                y: e.target.y(),
+              });
+            }}
+          />
+          {isSelected && (
+            <Transformer
+              ref={trRef}
+              boundBoxFunc={(oldBox, newBox) => {
+                if (newBox.width < 5 || newBox.height < 5) {
+                  return oldBox;
+                }
+                return newBox;
+              }}
+            />
+          )}
+        </>
+      ) : (
+        <></>
       )}
     </>
   );

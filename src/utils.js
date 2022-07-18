@@ -1,25 +1,4 @@
-export const FILTERS = [
-  "",
-  "Blur",
-  "Brighten",
-  "Contrast",
-  "Emboss",
-  "Enhance",
-  "Grayscale",
-  "HSL",
-  "HSV",
-  "Invert",
-  "Kaleidoscope",
-  "Mask",
-  "Noise",
-  "Pixelate",
-  "Posterize",
-  "RGB",
-  "RGBA",
-  "Sepia",
-  "Solarize",
-  "Threshold",
-];
+export const FILTERS = ["", "Grayscale"];
 
 export const STICKERS = [
   {

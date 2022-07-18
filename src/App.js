@@ -2,7 +2,7 @@ import "./App.css";
 import { Stage, Layer } from "react-konva";
 import { useEffect, useRef, useState } from "react";
 import URLSticker from "./components/URLSticker";
-import URLMainImage from "./components/URLSticker";
+import URLMainImage from "./components/URLMainImage";
 import { FILTERS, STICKERS } from "./utils";
 
 const LAYER_SIZE = {
@@ -13,7 +13,7 @@ const LAYER_SIZE = {
 function App() {
   const stageRef = useRef();
   const dragUrl = useRef();
-  const [mainImage, setMainImage] = useState([]);
+  const [mainImage, setMainImage] = useState();
   const [images, setImages] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const [exportImage, setExportImage] = useState(false);
@@ -54,9 +54,12 @@ function App() {
   }, [selectedId, exportImage]);
 
   const removeSelectedSticker = () => {
-    const newImages = images;
-    newImages.splice(selectedId, 1);
-    setImages(newImages);
+    if (!!selectedId && selectedId > -1) {
+      const newImages = images;
+      newImages.splice(selectedId, 1);
+      setImages(newImages);
+    } else {
+    }
     setSelectedId(null);
   };
 
@@ -70,7 +73,7 @@ function App() {
     <>
       <input type="file" accept="image/*" onChange={onImageChange} />
       <div className="flex">
-        {selectedFilter !== 0 && (
+        {selectedFilter > 0 && (mainImage || !!images.length) && (
           <button onClick={() => setSelectedFilter((prev) => prev - 1)}>
             {"<"}
           </button>
@@ -101,12 +104,13 @@ function App() {
             <Layer>
               {!!mainImage && (
                 <URLMainImage
-                  filter={selectedFilter}
+                  key={-1}
                   image={mainImage}
+                  filter={selectedFilter}
                   onClick={() => setSelectedId(-1)}
                   isSelected={-1 === selectedId}
                   onChange={(newAttrs) => {
-                    setMainImage(newAttrs);
+                    setMainImage(checkDragLimitis(newAttrs));
                   }}
                 />
               )}
@@ -115,6 +119,7 @@ function App() {
                   <URLSticker
                     key={index}
                     isSelected={index === selectedId}
+                    filter={selectedFilter}
                     onClick={() => setSelectedId(index)}
                     onChange={(newAttrs) => {
                       const rects = images.slice();
@@ -128,14 +133,16 @@ function App() {
             </Layer>
           </Stage>
         </div>
-        {selectedFilter < FILTERS.length - 1 && (
-          <button onClick={() => setSelectedFilter((prev) => prev + 1)}>
-            {">"}
-          </button>
-        )}
+        {selectedFilter < FILTERS.length - 1 &&
+          (mainImage || !!images.length) && (
+            <button onClick={() => setSelectedFilter((prev) => prev + 1)}>
+              {">"}
+            </button>
+          )}
       </div>
       {STICKERS.map((sticker) => (
         <img
+          key={sticker.alt}
           alt={sticker.alt}
           src={sticker.src}
           draggable="true"
