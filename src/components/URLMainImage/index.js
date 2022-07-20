@@ -1,24 +1,24 @@
 import useImage from "use-image";
 import { Image, Transformer } from "react-konva";
 import { useRef, useEffect } from "react";
-import { FILTERS } from "../utils";
+import { FILTERS, CANVAS_SIZE } from "../../utils";
 import Konva from "konva";
 
-const URLSticker = ({ image, isSelected, filter, onClick, onChange }) => {
-  const stickerRef = useRef();
+const URLMainImage = ({ image, isSelected, filter, onClick, onChange }) => {
   const trRef = useRef();
+  const imageRef = useRef();
   const [img] = useImage(image.src, "anonymous");
 
   useEffect(() => {
     if (isSelected) {
-      trRef.current.nodes([stickerRef.current]);
+      trRef.current.nodes([imageRef.current]);
       trRef.current.getLayer().batchDraw();
     }
   }, [isSelected]);
 
   useEffect(() => {
     if (img) {
-      stickerRef.current.cache();
+      imageRef.current.cache();
     }
   }, [img]);
 
@@ -27,13 +27,14 @@ const URLSticker = ({ image, isSelected, filter, onClick, onChange }) => {
       {img ? (
         <>
           <Image
-            ref={stickerRef}
+            className="sepia"
+            ref={imageRef}
             onClick={onClick}
             image={img}
-            x={image.x}
-            y={image.y}
-            offsetX={img ? img.width / 2 : 0}
-            offsetY={img ? img.height / 2 : 0}
+            width={img ? img.width : 0}
+            height={img ? img.height : 0}
+            x={!img.width ? image?.x : (CANVAS_SIZE.x - img.width) / 2}
+            y={!img.height ? image?.y : (CANVAS_SIZE.y - img.height) / 2}
             filters={!!filter ? [Konva.Filters[FILTERS[filter]]] : []}
             draggable
             onDragEnd={(e) => {
@@ -63,4 +64,4 @@ const URLSticker = ({ image, isSelected, filter, onClick, onChange }) => {
   );
 };
 
-export default URLSticker;
+export default URLMainImage;

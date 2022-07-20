@@ -1,4 +1,4 @@
-export const FILTERS = ["", "Grayscale"];
+export const FILTERS = ["", "Grayscale", "Sepia"];
 
 export const STICKERS = [
   {
@@ -10,3 +10,8 @@ export const STICKERS = [
     alt: "lion",
   },
 ];
+
+export const CANVAS_SIZE = {
+  x: 300,
+  y: 500,
+};
