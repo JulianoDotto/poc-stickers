@@ -1,17 +1,16 @@
 import useImage from "use-image";
 import { Image, Transformer } from "react-konva";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useMemo } from "react";
+import "gifler";
 
-const URLSticker = ({ image, isSelected }) => {
+const URLAnimatedSticker = ({ image, isSelected, onClick }) => {
   const stickerRef = useRef();
   const trRef = useRef();
-  const [img] = useImage(image.src, "anonymous");
-  console.log(image);
-  useEffect(() => {
-    if (img) {
-      console.log("img", img);
-    }
-  }, [img]);
+  const [img] = useImage(image.src);
+  const canvas = useMemo(() => {
+    const node = document.createElement("canvas");
+    return node;
+  }, []);
 
   useEffect(() => {
     if (isSelected) {
@@ -20,13 +19,28 @@ const URLSticker = ({ image, isSelected }) => {
     }
   }, [isSelected]);
 
+  useEffect(() => {
+    // save animation instance to stop it on unmount
+    let anim;
+    window.gifler(image.src).get((a) => {
+      anim = a;
+      anim.animateInCanvas(canvas);
+      anim.onDrawFrame = (ctx, frame) => {
+        ctx.drawImage(frame.buffer, frame.x, frame.y);
+        stickerRef.current.getLayer().draw();
+      };
+    });
+    return () => anim.stop();
+  }, [image, canvas]);
+
   return (
     <>
-      {img ? (
+      {canvas ? (
         <>
           <Image
             ref={stickerRef}
-            image={img}
+            onClick={onClick}
+            image={canvas}
             x={image.x}
             y={image.y}
             offsetX={img ? img.width / 2 : 0}
@@ -51,4 +65,4 @@ const URLSticker = ({ image, isSelected }) => {
   );
 };
 
-export default URLSticker;
+export default URLAnimatedSticker;

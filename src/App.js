@@ -2,6 +2,7 @@ import "./App.css";
 import { Stage, Layer } from "react-konva";
 import { useEffect, useRef, useState } from "react";
 import URLSticker from "./components/URLSticker";
+import URLAnimatedSticker from "./components/URLAnimatedSticker";
 import URLMainImage from "./components/URLMainImage";
 import { FILTERS, STICKERS, CANVAS_SIZE } from "./utils";
 
@@ -13,6 +14,8 @@ function App() {
   const [selectedId, setSelectedId] = useState(null);
   const [exportImage, setExportImage] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState(0);
+
+  useEffect(() => {}, [stageRef]);
 
   const onImageChange = (e) => {
     if (e.target.files.length > 0)
@@ -26,14 +29,29 @@ function App() {
     }
   };
 
-  function downloadURI(uri, name) {
-    var link = document.createElement("a");
-    link.download = name;
-    link.href = uri;
-    link.crossOrigin = "anonymous";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  function downloadURL(url, name, animated) {
+    if (animated) {
+      const vid = document.createElement("video");
+      vid.src = url;
+      vid.controls = true;
+      document.body.appendChild(vid);
+      const a = document.createElement("a");
+      a.download = name;
+      a.href = vid.src;
+      a.crossOrigin = "anonymous";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      document.body.removeChild(vid);
+    } else {
+      var link = document.createElement("a");
+      link.download = name;
+      link.href = url;
+      link.crossOrigin = "anonymous";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   }
 
   const handleExport = () => {
@@ -43,20 +61,33 @@ function App() {
 
   useEffect(() => {
     if (exportImage && selectedId === null) {
-      const uri = stageRef.current.toDataURL();
-      downloadURI(uri, "minha_foto.png");
-      setExportImage(false);
-    }
-  }, [selectedId, exportImage]);
+      const isAnimated = images.some((image) => image.animated);
+      if (isAnimated) {
+        var chunks = [];
+        const canvas = document.querySelector(".konva-canvas canvas");
+        const canvas_stream = canvas.captureStream();
+        const mediaRecorder = new MediaRecorder(canvas_stream);
 
-  const removeSelectedSticker = (deleteId) => {
-    if (deleteId >= 0) {
-      const newImages = images;
-      newImages.splice(deleteId, 1);
-      setImages(newImages);
+        mediaRecorder.ondataavailable = (e) => {
+          chunks.push(e.data);
+        };
+        mediaRecorder.onstop = (e) => {
+          const blob = new Blob(chunks, { type: "video/webm" });
+          const url = URL.createObjectURL(blob);
+          console.log(url);
+          downloadURL(url, "meu_video.webm", true);
+          setExportImage(false);
+        };
+        mediaRecorder.start(30);
+        setTimeout(() => mediaRecorder.stop(), 3000);
+      } else {
+        const uri = stageRef.current.toDataURL();
+        console.log(uri);
+        downloadURL(uri, "minha_foto.png", false);
+        setExportImage(false);
+      }
     }
-    setSelectedId(null);
-  };
+  }, [selectedId, exportImage, images]);
 
   const checkDragLimitis = (img) => {
     if (img.x > CANVAS_SIZE.x) img.x = CANVAS_SIZE.x;
@@ -68,7 +99,7 @@ function App() {
     <div className="align-center">
       <input type="file" accept="image/*" onChange={onImageChange} />
       <div className="flex">
-        {selectedFilter > 0 && (mainImage || !!images.length) && (
+        {selectedFilter > 0 && mainImage && (
           <button onClick={() => setSelectedFilter((prev) => prev - 1)}>
             {"<"}
           </button>
@@ -81,7 +112,8 @@ function App() {
               images.concat([
                 {
                   ...stageRef.current.getPointerPosition(),
-                  src: dragUrl.current,
+                  src: dragUrl.current.src,
+                  animated: dragUrl.current.animated,
                 },
               ])
             );
@@ -89,8 +121,10 @@ function App() {
           onDragOver={(e) => e.preventDefault()}
         >
           <Stage
+            key="main"
             width={CANVAS_SIZE.x}
             height={CANVAS_SIZE.y}
+            className="konva-canvas"
             onMouseDown={checkDeselect}
             onTouchStart={checkDeselect}
             style={{ border: "1px solid grey", width: "fit-content" }}
@@ -111,19 +145,21 @@ function App() {
               )}
               {images.map((image, index) => {
                 return (
-                  <URLSticker
-                    key={index}
-                    isSelected={index === selectedId}
-                    filter={selectedFilter}
-                    onClick={() => setSelectedId(index)}
-                    onDeleteSticker={() => removeSelectedSticker(index)}
-                    onChange={(newAttrs) => {
-                      const rects = images.slice();
-                      rects[index] = checkDragLimitis(newAttrs);
-                      setImages(rects);
-                    }}
-                    image={image}
-                  />
+                  <>
+                    {image.animated ? (
+                      <URLAnimatedSticker
+                        key={index}
+                        isSelected={index === selectedId}
+                        image={image}
+                      />
+                    ) : (
+                      <URLSticker
+                        key={index}
+                        isSelected={index === selectedId}
+                        image={image}
+                      />
+                    )}
+                  </>
                 );
               })}
             </Layer>
@@ -136,15 +172,18 @@ function App() {
             </button>
           )}
       </div>
-      <div>
+      <div className="stickers-wrap">
         {STICKERS.map((sticker) => (
           <img
             key={sticker.alt}
             alt={sticker.alt}
             src={sticker.src}
-            draggable="true"
+            draggable
             onDragStart={(e) => {
-              dragUrl.current = e.target.src;
+              dragUrl.current = {
+                src: e.target.src,
+                animated: !!sticker.animated,
+              };
             }}
           />
         ))}
@@ -152,6 +191,9 @@ function App() {
       <div>
         <button onClick={handleExport}>Exportar minha foto</button>
       </div>
+      {/* {imagePreview && (
+        <img width={64} height={64} src={imagePreview} alt="preview" />
+      )} */}
     </div>
   );
 }

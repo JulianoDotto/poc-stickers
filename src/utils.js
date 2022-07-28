@@ -1,13 +1,33 @@
+import Sticker1 from "./assets/sticker1.svg";
+import Sticker2 from "./assets/sticker2.svg";
+// import Sticker3 from "./assets/sticker3.gif";
+// import Sticker3WEBP from "./assets/sticker3.webp";
+import Sticker4 from "./assets/sticker4.gif";
+
 export const FILTERS = ["", "Grayscale", "Sepia"];
 
 export const STICKERS = [
   {
-    src: "https://cdn-icons-png.flaticon.com/128/863/863491.png",
-    alt: "mustache",
+    src: Sticker1,
+    alt: "1",
   },
   {
-    src: "https://konvajs.org/assets/lion.png",
-    alt: "lion",
+    src: Sticker2,
+    alt: "2",
+  },
+  // {
+  //   src: Sticker3,
+  //   alt: "3",
+  //   animated: true,
+  // },
+  // {
+  //   src: Sticker3WEBP,
+  //   alt: "3webp",
+  // },
+  {
+    src: Sticker4,
+    alt: "4",
+    animated: true,
   },
 ];
 
