@@ -15,6 +15,7 @@ function App() {
   const [exportImage, setExportImage] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState(0);
   const [language, setLanguage] = useState("ptBR");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {}, [stageRef]);
 
@@ -53,6 +54,7 @@ function App() {
       link.click();
       document.body.removeChild(link);
     }
+    setLoading(false);
   }
 
   const handleExport = () => {
@@ -62,6 +64,7 @@ function App() {
 
   useEffect(() => {
     if (exportImage && selectedId === null) {
+      setLoading(true);
       const isAnimated = images.some((image) => image.animated);
       if (isAnimated) {
         var chunks = [];
@@ -76,7 +79,7 @@ function App() {
           const blob = new Blob(chunks, { type: "video/webm" });
           const url = URL.createObjectURL(blob);
           console.log(url);
-          downloadURL(url, "meu_video.webm", true);
+          downloadURL(url, LANGUAGE_TEXTS[language].myVideoWEBM, true);
           setExportImage(false);
         };
         mediaRecorder.start(30);
@@ -84,7 +87,7 @@ function App() {
       } else {
         const uri = stageRef.current.toDataURL();
         console.log(uri);
-        downloadURL(uri, "minha_foto.png", false);
+        downloadURL(uri, LANGUAGE_TEXTS[language].myImagePNG, false);
         setExportImage(false);
       }
     }
@@ -214,9 +217,13 @@ function App() {
         ))}
       </div>
       <div>
-        <button className="btn" onClick={handleExport}>
-          {LANGUAGE_TEXTS[language].exportFile}
-        </button>
+        {!loading ? (
+          <button className="btn" onClick={handleExport}>
+            {LANGUAGE_TEXTS[language].exportFile}
+          </button>
+        ) : (
+          <span>{LANGUAGE_TEXTS[language].loading}</span>
+        )}
       </div>
       {/* {imagePreview && (
         <img width={64} height={64} src={imagePreview} alt="preview" />

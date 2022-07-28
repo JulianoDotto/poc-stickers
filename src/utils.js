@@ -42,11 +42,17 @@ export const LANGUAGE_TEXTS = {
     exportFile: "Exportar arquivo",
     portuguese: "Português",
     english: "Inglês",
+    myImagePNG: "Minha_imagem.png",
+    myVideoWEBM: "Meu_vídeo.webm",
+    loading: "Carregando...",
   },
   en: {
     chooseImage: "Choose an image",
     exportFile: "Export file",
     portuguese: "Portuguese",
     english: "English",
+    myImagePNG: "My_image.png",
+    myVideoWEBM: "My_video.webm",
+    loading: "Loading...",
   },
 };
