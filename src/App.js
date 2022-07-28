@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import URLSticker from "./components/URLSticker";
 import URLAnimatedSticker from "./components/URLAnimatedSticker";
 import URLMainImage from "./components/URLMainImage";
-import { FILTERS, STICKERS, CANVAS_SIZE } from "./utils";
+import { FILTERS, STICKERS, CANVAS_SIZE, LANGUAGE_TEXTS } from "./utils";
 
 function App() {
   const stageRef = useRef();
@@ -14,6 +14,7 @@ function App() {
   const [selectedId, setSelectedId] = useState(null);
   const [exportImage, setExportImage] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState(0);
+  const [language, setLanguage] = useState("ptBR");
 
   useEffect(() => {}, [stageRef]);
 
@@ -97,7 +98,31 @@ function App() {
 
   return (
     <div className="align-center">
-      <input type="file" accept="image/*" onChange={onImageChange} />
+      <div className="language-selector">
+        <button
+          className={language === "ptBR" ? "btn selected" : "btn"}
+          onClick={() => setLanguage("ptBR")}
+        >
+          🇧🇷
+        </button>
+        <button
+          className={language === "en" ? "btn selected" : "btn"}
+          onClick={() => setLanguage("en")}
+        >
+          🇺🇸
+        </button>
+      </div>
+      <div className="file-wrapper">
+        <label className="btn" htmlFor="files">
+          {LANGUAGE_TEXTS[language].chooseImage}
+        </label>
+        <input
+          id="files"
+          type="file"
+          accept="image/*"
+          onChange={onImageChange}
+        />
+      </div>
       <div className="flex">
         {selectedFilter > 0 && mainImage && (
           <button onClick={() => setSelectedFilter((prev) => prev - 1)}>
@@ -189,7 +214,9 @@ function App() {
         ))}
       </div>
       <div>
-        <button onClick={handleExport}>Exportar minha foto</button>
+        <button className="btn" onClick={handleExport}>
+          {LANGUAGE_TEXTS[language].exportFile}
+        </button>
       </div>
       {/* {imagePreview && (
         <img width={64} height={64} src={imagePreview} alt="preview" />

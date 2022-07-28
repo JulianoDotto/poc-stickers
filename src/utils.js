@@ -35,3 +35,18 @@ export const CANVAS_SIZE = {
   x: 300,
   y: 500,
 };
+
+export const LANGUAGE_TEXTS = {
+  ptBR: {
+    chooseImage: "Escolha uma imagem",
+    exportFile: "Exportar arquivo",
+    portuguese: "Português",
+    english: "Inglês",
+  },
+  en: {
+    chooseImage: "Choose an image",
+    exportFile: "Export file",
+    portuguese: "Portuguese",
+    english: "English",
+  },
+};
