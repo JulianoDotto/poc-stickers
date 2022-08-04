@@ -4,7 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import URLSticker from "./components/URLSticker";
 import URLAnimatedSticker from "./components/URLAnimatedSticker";
 import URLMainImage from "./components/URLMainImage";
-import { FILTERS, STICKERS, CANVAS_SIZE, LANGUAGE_TEXTS } from "./utils";
+import {
+  FILTERS,
+  STICKERS,
+  CANVAS_SIZE,
+  LANGUAGE_TEXTS,
+  STICKER_TEMPLATES,
+} from "./utils";
 
 function App() {
   const stageRef = useRef();
@@ -78,7 +84,6 @@ function App() {
         mediaRecorder.onstop = (e) => {
           const blob = new Blob(chunks, { type: "video/webm" });
           const url = URL.createObjectURL(blob);
-          console.log(url);
           downloadURL(url, LANGUAGE_TEXTS[language].myVideoWEBM, true);
           setExportImage(false);
         };
@@ -86,12 +91,30 @@ function App() {
         setTimeout(() => mediaRecorder.stop(), 3000);
       } else {
         const uri = stageRef.current.toDataURL();
-        console.log(uri);
         downloadURL(uri, LANGUAGE_TEXTS[language].myImagePNG, false);
         setExportImage(false);
       }
     }
-  }, [selectedId, exportImage, images]);
+  }, [selectedId, exportImage, images, language]);
+
+  const changeTemplateSticker = (newSticker) => {
+    const newImages = [...images];
+    console.log(images);
+    newImages.forEach((image) => {
+      if (image.id === selectedId) {
+        image.src = newSticker.src;
+        image.animated = !!newSticker.animated;
+        image.id = newSticker.id;
+      }
+    });
+    console.log(images);
+    console.log(newImages);
+    setImages(newImages);
+  };
+
+  const changeStickerTemplate = (template) => {
+    setImages(template);
+  };
 
   const checkDragLimitis = (img) => {
     if (img.x > CANVAS_SIZE.x) img.x = CANVAS_SIZE.x;
@@ -133,19 +156,19 @@ function App() {
           </button>
         )}
         <div
-          onDrop={(e) => {
-            e.preventDefault();
-            stageRef.current.setPointersPositions(e);
-            setImages(
-              images.concat([
-                {
-                  ...stageRef.current.getPointerPosition(),
-                  src: dragUrl.current.src,
-                  animated: dragUrl.current.animated,
-                },
-              ])
-            );
-          }}
+          // onDrop={(e) => {
+          //   e.preventDefault();
+          //   stageRef.current.setPointersPositions(e);
+          //   setImages(
+          //     images.concat([
+          //       {
+          //         ...stageRef.current.getPointerPosition(),
+          //         src: dragUrl.current.src,
+          //         animated: dragUrl.current.animated,
+          //       },
+          //     ])
+          //   );
+          // }}
           onDragOver={(e) => e.preventDefault()}
         >
           <Stage
@@ -171,19 +194,21 @@ function App() {
                   }}
                 />
               )}
-              {images.map((image, index) => {
+              {images.map((image) => {
                 return (
                   <>
                     {image.animated ? (
                       <URLAnimatedSticker
-                        key={index}
-                        isSelected={index === selectedId}
+                        key={image.id}
+                        isSelected={image.id === selectedId}
+                        onSelect={() => setSelectedId(image.id)}
                         image={image}
                       />
                     ) : (
                       <URLSticker
-                        key={index}
-                        isSelected={index === selectedId}
+                        key={image.id}
+                        isSelected={image.id === selectedId}
+                        onSelect={() => setSelectedId(image.id)}
                         image={image}
                       />
                     )}
@@ -201,19 +226,32 @@ function App() {
           )}
       </div>
       <div className="stickers-wrap">
-        {STICKERS.map((sticker) => (
-          <img
-            key={sticker.alt}
-            alt={sticker.alt}
-            src={sticker.src}
-            draggable
-            onDragStart={(e) => {
-              dragUrl.current = {
-                src: e.target.src,
-                animated: !!sticker.animated,
-              };
-            }}
-          />
+        {selectedId >= 0 &&
+          !!selectedId &&
+          STICKERS.map((sticker) => (
+            <img
+              key={sticker.alt}
+              alt={sticker.alt}
+              src={sticker.src}
+              onClick={() => changeTemplateSticker(sticker)}
+              draggable
+              onDragStart={(e) => {
+                dragUrl.current = {
+                  src: e.target.src,
+                  animated: !!sticker.animated,
+                };
+              }}
+            />
+          ))}
+      </div>
+      <div className="templateBtn-wrap">
+        {STICKER_TEMPLATES.map(({ name, template }) => (
+          <button
+            className="btn"
+            onClick={() => changeStickerTemplate(template)}
+          >
+            {name}
+          </button>
         ))}
       </div>
       <div>

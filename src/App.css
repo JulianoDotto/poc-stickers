@@ -1,3 +1,69 @@
 .flex {
   display: flex;
 }
+
+.align-center {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  align-items: center;
+  justify-content: center;
+}
+
+.stickers-wrap {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+.stickers-wrap img {
+  width: 64px;
+  height: 64px;
+  margin: 0 20px;
+  cursor: pointer;
+}
+.file-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+.file-wrapper input {
+  visibility: hidden;
+}
+
+.file-wrapper label {
+  font-size: 14px;
+}
+
+.btn {
+  padding: 10px;
+  border: 1px solid black;
+  border-radius: 5px;
+  cursor: pointer;
+  background-color: transparent;
+}
+.btn:active,
+.btn.selected {
+  background-color: #0004ff;
+  color: white;
+}
+
+.language-selector {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+}
+
+.language-selector .btn {
+  font-size: 24px;
+}
+
+.templateBtn-wrap {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+}

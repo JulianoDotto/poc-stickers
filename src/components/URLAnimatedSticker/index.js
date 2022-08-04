@@ -3,7 +3,7 @@ import { Image, Transformer } from "react-konva";
 import { useRef, useEffect, useMemo } from "react";
 import "gifler";
 
-const URLAnimatedSticker = ({ image, isSelected, onClick }) => {
+const URLAnimatedSticker = ({ image, isSelected, onSelect }) => {
   const stickerRef = useRef();
   const trRef = useRef();
   const [img] = useImage(image.src);
@@ -39,7 +39,7 @@ const URLAnimatedSticker = ({ image, isSelected, onClick }) => {
         <>
           <Image
             ref={stickerRef}
-            onClick={onClick}
+            onClick={onSelect}
             image={canvas}
             x={image.x}
             y={image.y}
@@ -48,13 +48,15 @@ const URLAnimatedSticker = ({ image, isSelected, onClick }) => {
           />
           {isSelected && (
             <Transformer
+              resizeEnabled={false}
+              rotateEnabled={false}
               ref={trRef}
-              boundBoxFunc={(oldBox, newBox) => {
-                if (newBox.width < 5 || newBox.height < 5) {
-                  return oldBox;
-                }
-                return newBox;
-              }}
+              // boundBoxFunc={(oldBox, newBox) => {
+              //   if (newBox.width < 5 || newBox.height < 5) {
+              //     return oldBox;
+              //   }
+              //   return newBox;
+              // }}
             />
           )}
         </>

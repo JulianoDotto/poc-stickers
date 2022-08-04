@@ -2,16 +2,10 @@ import useImage from "use-image";
 import { Image, Transformer } from "react-konva";
 import { useRef, useEffect } from "react";
 
-const URLSticker = ({ image, isSelected }) => {
+const URLSticker = ({ image, isSelected, onSelect }) => {
   const stickerRef = useRef();
   const trRef = useRef();
   const [img] = useImage(image.src, "anonymous");
-  console.log(image);
-  useEffect(() => {
-    if (img) {
-      console.log("img", img);
-    }
-  }, [img]);
 
   useEffect(() => {
     if (isSelected) {
@@ -29,18 +23,21 @@ const URLSticker = ({ image, isSelected }) => {
             image={img}
             x={image.x}
             y={image.y}
+            onClick={onSelect}
             offsetX={img ? img.width / 2 : 0}
             offsetY={img ? img.height / 2 : 0}
           />
           {isSelected && (
             <Transformer
+              resizeEnabled={false}
+              rotateEnabled={false}
               ref={trRef}
-              boundBoxFunc={(oldBox, newBox) => {
-                if (newBox.width < 5 || newBox.height < 5) {
-                  return oldBox;
-                }
-                return newBox;
-              }}
+              // boundBoxFunc={(oldBox, newBox) => {
+              //   if (newBox.width < 5 || newBox.height < 5) {
+              //     return oldBox;
+              //   }
+              //   return newBox;
+              // }}
             />
           )}
         </>

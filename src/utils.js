@@ -15,19 +15,29 @@ export const STICKERS = [
     src: Sticker2,
     alt: "2",
   },
-  // {
-  //   src: Sticker3,
-  //   alt: "3",
-  //   animated: true,
-  // },
-  // {
-  //   src: Sticker3WEBP,
-  //   alt: "3webp",
-  // },
   {
     src: Sticker4,
     alt: "4",
     animated: true,
+  },
+];
+
+export const STICKER_TEMPLATES = [
+  {
+    name: "template 1",
+    template: [
+      { id: 1, x: 150, y: 100, src: Sticker4, animated: true },
+      { id: 2, x: 150, y: 250, src: Sticker4, animated: true },
+      { id: 3, x: 150, y: 400, src: Sticker2, animated: false },
+    ],
+  },
+  {
+    name: "template 2",
+    template: [
+      { id: 1, x: 150, y: 100, src: Sticker2, animated: false },
+      { id: 2, x: 150, y: 250, src: Sticker2, animated: false },
+      { id: 3, x: 150, y: 400, src: Sticker4, animated: true },
+    ],
   },
 ];
 
